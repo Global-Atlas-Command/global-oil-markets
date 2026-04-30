@@ -1,0 +1,33 @@
+name: GOM Daily Update
+
+on:
+  schedule:
+    - cron: "30 11 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write Market State
+        run: |
+          cat <<EOF > assets/data/market-state.json
+          {
+            "date": "$(date)",
+            "structure": "Brent-WTI remains wide",
+            "products": "Diesel supporting margins",
+            "flows": "Caspian barrels moving through Ceyhan; Turkey steady",
+            "balance": "ARA stable with no visible pressure"
+          }
+          EOF
+
+      - name: Commit
+        run: |
+          git config user.name "gom-bot"
+          git config user.email "admin@globaloilmarkets.com"
+          git add .
+          git commit -m "daily update" || echo "no changes"
+          git push
