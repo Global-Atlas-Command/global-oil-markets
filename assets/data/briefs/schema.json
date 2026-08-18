@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://globaloilmarkets.com/schemas/daily-brief-1.0.json",
+  "title": "Global Oil Markets Daily Brief",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "date",
+    "sector",
+    "title",
+    "executive_summary",
+    "developments",
+    "portfolio_implications",
+    "risks",
+    "opportunities",
+    "watch_items",
+    "sources",
+    "confidence",
+    "publication_status"
+  ]
+}
