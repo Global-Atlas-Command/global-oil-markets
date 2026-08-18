@@ -23,8 +23,9 @@ const prompt = `Produce today's Global Oil Markets executive daily brief for ${t
 
 const response = await client.responses.create({
   model: "gpt-5",
-  tools: [{ type: "web_search", search_context_size: "high" }],
+  tools: [{ type: "web_search", search_context_size: "medium" }],
   input: prompt,
+  max_output_tokens: 3000,
   text: { format: { type: "json_schema", name: "gom_daily_brief", strict: true, schema } }
 });
 if (!response.output_text) throw new Error("OpenAI returned no brief output.");
