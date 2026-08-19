@@ -227,7 +227,7 @@ const response = await client.responses.create({
 
   input: prompt,
 
-  max_output_tokens: 3000,
+  max_output_tokens: 6000,
 
   text: {
     format: {
