@@ -211,14 +211,24 @@ Rules:
 
 const response = await client.responses.create({
   model: "gpt-5",
+
+  reasoning: {
+    effort: "low"
+  },
+
   tools: [
     {
       type: "web_search",
       search_context_size: "medium"
     }
   ],
+
+  max_tool_calls: 4,
+
   input: prompt,
+
   max_output_tokens: 3000,
+
   text: {
     format: {
       type: "json_schema",
@@ -229,11 +239,60 @@ const response = await client.responses.create({
   }
 });
 
+if (response.status !== "completed") {
+  console.error(
+    "OpenAI response did not complete:",
+    JSON.stringify(
+      {
+        status: response.status,
+        incomplete_details: response.incomplete_details,
+        error: response.error,
+        usage: response.usage
+      },
+      null,
+      2
+    )
+  );
+
+  throw new Error(
+    `OpenAI response ${response.status}: ${
+      response.incomplete_details?.reason ??
+      response.error?.message ??
+      "unknown reason"
+    }`
+  );
+}
+
 if (!response.output_text) {
+  console.error(
+    "OpenAI returned no output_text:",
+    JSON.stringify(
+      {
+        output: response.output,
+        usage: response.usage
+      },
+      null,
+      2
+    )
+  );
+
   throw new Error("OpenAI returned no brief output.");
 }
 
-const brief = JSON.parse(response.output_text);
+let brief;
+
+try {
+  brief = JSON.parse(response.output_text);
+} catch (error) {
+  console.error(
+    "Failed to parse OpenAI structured output:",
+    response.output_text
+  );
+
+  throw new Error(
+    `OpenAI returned invalid JSON: ${error.message}`
+  );
+}
 
 brief.date = today;
 
@@ -262,16 +321,26 @@ fs.mkdirSync(outDir, {
 const rendered =
   JSON.stringify(brief, null, 2) + "\n";
 
+const datedPath = path.join(
+  outDir,
+  `${today}.json`
+);
+
+const latestPath = path.join(
+  outDir,
+  "latest.json"
+);
+
 fs.writeFileSync(
-  path.join(outDir, `${today}.json`),
+  datedPath,
   rendered
 );
 
 fs.writeFileSync(
-  path.join(outDir, "latest.json"),
+  latestPath,
   rendered
 );
 
 console.log(
-  `Wrote ${today}.json and latest.json`
+  `Wrote ${datedPath} and ${latestPath}`
 );
